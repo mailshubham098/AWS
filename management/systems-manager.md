@@ -1,0 +1,214 @@
+
+#### [AWS Systems manager](https://docs.aws.amazon.com/systems-manager/latest/userguide/what-is-systems-manager.html)
+- view and control your infrastructure on AWS
+- automate operational tasks across your AWS resources
+- maintain security and compliance by scanning your managed instances and reporting on (or taking corrective action on) any policy violations it detects.
+- A managed instance is a machine that has been configured for use with Systems Manager.
+- Using Systems Manager, you can associate AWS resources together by applying the same identifying resource tag to each of them.
+
+SSM Agent
+- is Amazon software that can be installed and configured on an Amazon EC2 instance, an on-premises server, or a virtual machine (VM)
+- SSM Agent makes it possible for Systems Manager to update, manage, and configure these resources.
+- agent processes requests from the Systems Manager service in the AWS Cloud, and then runs them as specified in the request. SSM Agent then sends status and execution information back to the Systems Manager service by using the Amazon Message Delivery Service (service prefix: ec2messages).
+- SSM Agent is preinstalled, by default, on the popular Amazon Machine Images (AMIs)
+
+Systems Manager Capabilities
+- grouped into
+  - Operations Management
+  - Application Management
+  - Actions & Change
+  - Instances & Nodes
+  - Shared Resources
+
+Operations Management
+- Explorer
+  - customizable operations dashboard that reports information about your AWS resources.
+  - Explorer displays an aggregated view of operations data (OpsData) for your AWS accounts and across Regions
+  -  In Explorer, OpsData includes metadata about your Amazon EC2 instances, patch compliance details, and operational work items (OpsItems)
+  - provides context about how OpsItems are distributed across your business units or applications, how they trend over time, and how they vary by category
+  - How does Explorer relate to OpsCenter?
+    - Systems Manager OpsCenter provides a central location where operations engineers and IT professionals view, investigate, and resolve OpsItems related to AWS resources. Explorer is a report hub where DevOps managers view aggregated summaries of their operations data, including OpsItems, across AWS Regions and accounts. Explorer helps users discover trends and patterns and, if necessary, quickly resolve issues using Systems Manager Automation runbooks.
+    - OpsCenter setup is now integrated with Explorer Setup. If you already set up OpsCenter, then Explorer automatically displays operations data, including aggregated information about OpsItems. If you have not set up OpsCenter, then you can use Explorer Setup to get started with both capabilities.
+  - OpsData
+    - OpsData is any operations data displayed in the Systems Manager Explorer dashboard. Explorer retrieves OpsData from Amazon EC2, Systems Manager OpsCenter, and Systems Manager Patch Manager.
+  - Charged : Yes
+- OpsCenter
+- Amazon CloudWatch Dashboards
+- Trusted Advisor
+
+
+Application Management
+- Application Management is a suite of capabilities that help you manage your applications running in AWS.
+- Resource Groups
+  - A resource group is a collection of AWS resources that are all in the same AWS Region, and that match criteria provided in a query. (In AWS, a resource is an entity that you can work with. Examples include an Amazon EC2 instance, an AWS CloudFormation stack, and an Amazon S3 bucket.) You build queries in the AWS Resource Groups (Resource Groups) console, or pass them as arguments to Resource Groups commands in the AWS CLI.
+  - use resource groups to organize your AWS resources.
+  - make it easier to manage and automate tasks on large numbers of resources at one time.
+  -  In Resource Groups, there are two types of queries on which you can build a group. Both query types include resources that are specified in the format AWS::service::resource.
+    - Tag-based
+    - AWS CloudFormation stack-based
+  - operations
+    - create,update, delete groups
+    - integration with cloudtrail
+  - Tag editor
+  - Tag policies : type of policy that you create in AWS Organizations. You can use tag policies to help standardize tags across resources in your organization's accounts
+- AppConfig
+  - create, manage, and quickly deploy application configurations.
+  - use AppConfig with applications hosted on Amazon EC2 instances, AWS Lambda, containers, mobile applications, or IoT devices.
+  - usecases :
+    - Application tuning
+    - Feature toggle
+    - User membership
+    - Operational issues
+  - Benefits :
+    - Deploy changes across a set of targets quickly
+    - Reduce errors in configuration changes
+    - Update applications without interruptions
+    - Control deployment of changes across your application
+  - Types of Targets supported :
+    - applications hosted on Amazon EC2 instances, AWS Lambda, containers, mobile applications, or IoT devices
+  - Chargable : Yes
+  - How Does AppConfig Work ?
+    - Configure AppConfig to work with your application.
+    - Enable your application code to periodically check for and receive configuration data from AppConfig.
+    - Deploy a new or updated configuration.
+- Parameter Store
+  - provides secure, hierarchical storage for configuration data management and secrets management.
+  - can store data such as passwords, database strings, and license codes as parameter values.
+  - can store values as plaintext (unencrypted data) or ciphertext (encrypted data)
+  - Organizing Parameters into Hierarchies:
+    - Managing dozens or hundreds of parameters as a flat list is time consuming and prone to errors. It can also be difficult to identify the correct parameter for a task. This means you might accidentally use the wrong parameter, or you might create multiple parameters that use the same configuration data.
+    - You can use parameter hierarchies to help you organize and manage parameters. A hierarchy is a parameter name that includes a path that you define by using forward slashes (/).
+    - The following example uses three hierarchy levels in the name to identify the following:
+      - /Environment/Type of computer/Application/Data
+      - /Dev/DBServer/MySQL/db-string13
+  - Working with Parameter Policies
+    - Parameter policies help you manage a growing set of parameters by enabling you to assign specific criteria to a parameter such as an expiration date or time to live
+  - Working with Public Parameters
+    - Some AWS services publish information about common artifacts as Systems Manager public parameters. For example, the Amazon Elastic Compute Cloud (Amazon EC2) service publishes information about Amazon Machines Images (AMIs) as public parameters
+    - Amazon EC2 AMI public parameters are available from the following paths:
+      - /aws/service/ami-amazon-linux-latest
+      - /aws/service/ami-windows-latest
+  - Increasing Parameter Store Throughput :
+    - Increasing Parameter Store throughput increases the maximum number of transactions per second (TPS) that Parameter Store can process. Increased throughput enables you to operate Parameter Store at higher volumes to support applications and workloads that need concurrent access to a large number of parameters. You can increase the limit to 1,000 TPS on the Settings tab.
+    - chargable
+  - Walkthrough (common commands)
+    - simple add param : aws ssm put-parameter --name "parameter_name" --value "a parameter value" --type String
+    - uses a parameter hierarchy : aws ssm put-parameter --name "/Test/IAD/helloWorld" --value "My1stParameter" --type String
+    - view the parameter metadata : aws ssm describe-parameters --filters "Key=Name,Values=/Test/IAD/helloWorld"
+    - change the parameter value.: aws ssm put-parameter --name "/Test/IAD/helloWorld" --value "good day sunshine" --type String --overwrite
+    - view the latest parameter value : aws ssm get-parameters --names "/Test/IAD/helloWorld"
+    - view the parameter value history : aws ssm get-parameter-history --name "/Test/IAD/helloWorld"
+    - use this parameter in a command : aws ssm send-command --document-name "AWS-RunShellScript" --parameters '{"commands":["echo {{ssm:/Test/IAD/helloWorld}}"]}' --targets "Key=instanceids,Values=instance-ids"
+    - uses a customer managed customer master key (CMK) : aws ssm put-parameter --name "parameter_name" --value "a value, for example P@ssW%rd#1" --type "SecureString"
+    - uses a custom AWS KMS key: aws ssm put-parameter --name "parameter_name" --value "a parameter value" --type "SecureString" --key-id "your-AWS-user-account ID/the-custom-AWS KMS-key"
+
+Actions & Change
+- capabilities for managing your Amazon EC2 instances, your on-premises servers and virtual machines (VMs) in your hybrid environment, and other types of AWS resources (nodes).
+- Compliance
+  - Configuration Compliance
+    - scan your fleet of managed instances for patch compliance and configuration inconsistencies.
+  - Patch compliance
+  - Association compliance
+  - remediate patch and association compliance issues by using Systems Manager Run Command.
+- Inventory
+  - provides visibility into your Amazon EC2 and on-premises computing environment.
+  -  use Inventory to collect metadata from your managed instances. can store this metadata in a central Amazon Simple Storage Service (Amazon S3) bucket, and then use built-in tools to query the data and quickly determine which instances are running the software and configurations required by your software policy, and which instances need to be updated.
+  - If the pre-configured metadata types collected by Systems Manager Inventory don't meet your needs, then you can create custom inventory. Custom inventory is simply a JSON file with information that you provide and add to the managed instance in a specific directory.
+  - Systems Manager Inventory collects only metadata from your managed instances. Inventory does not access proprietary information or data.
+  - Related AWS Services  
+    - AWS Config provides a historical record of changes to your inventory, along with the ability to create rules to generate notifications when a configuration item is changed.
+    - AWS Application Discovery Service is designed to collect inventory on OS type, application inventory, processes, connections, and server performance metrics from your on-premises VMs to support a successful migration to AWS
+- Managed Instances
+  - A managed instance is any machine configured for AWS Systems Manager. You can configure Amazon EC2 instances or on-premises machines in a hybrid environment as managed instances
+- Session Manager
+  - capability that lets you manage your Amazon EC2 instances, on-premises instances, and virtual machines (VMs) through an interactive one-click browser-based shell or through the AWS CLI.
+  - provides secure and auditable instance management without the need to open inbound ports, maintain bastion hosts, or manage SSH keys.
+  - Benefits
+    - Centralized access control to instances using IAM policies
+    - No open inbound ports and no need to manage bastion hosts or SSH keys
+    - One-click access to instances from the console and CLI
+    - Port forwarding
+    - Cross-platform support for both Windows and Linux
+    - Logging and auditing session activity
+  - What Is a Session?
+    - A session is a connection made to an instance using Session Manager. Sessions are based on a secure bi-directional communication channel between the client (you) and the remote managed instance that streams inputs and outputs for commands.
+    - This two-way communication enables interactive bash and PowerShell access to instances.
+    - Traffic between a client and a managed instance is encrypted using TLS 1.2
+    - You can also use an AWS Key Management Service (AWS KMS) key to further encrypt data beyond the default TLS encryption.
+- Run Command
+  - lets you remotely and securely manage the configuration of your managed instances.
+  - enables you to automate common administrative tasks and perform ad hoc configuration changes at scale
+  - Administrators use Run Command to perform the following types of tasks on their managed instances: install or bootstrap applications, build a deployment pipeline, capture log files when an instance is terminated from an Auto Scaling group, and join instances to a Windows domain, to name a few.
+- State Manager
+  -  secure and scalable configuration management service that automates the process of keeping your Amazon EC2 and hybrid infrastructure in a state that you define.
+  - The following list describes the types of tasks you can perform with State Manager.
+    - Bootstrap instances with specific software at start-up
+    - Download and update agents on a defined schedule, including SSM Agent
+    - Configure network settings
+    - Join instances to a Windows domain (Windows instances only)
+    - Patch instances with software updates throughout their lifecycle
+    - Run scripts on Linux and Windows managed instances throughout their lifecycle
+  - how it works ?
+    - Determine the state you want to apply to your managed instances.
+    - Determine if a preconfigured SSM document can help you create the State Manager association.
+    - Create the association.
+    - Monitor and update.
+  - Associations
+    - A State Manager association is a configuration that is assigned to your managed instances. The configuration defines the state that you want to maintain on your instances. For example, an association can specify that anti-virus software must be installed and running on your instances, or that certain ports must be closed
+    - Targets and Rate Controls
+      - enables you to create State Manager associations on a fleet of managed instances by using targets.
+      - Additionally, you can control the execution of these associations across your fleet by specifying a concurrency value and an error threshold.
+      - Concurrency
+        -  The concurrency value specifies how many resources are allowed to run the association simultaneously.
+        - Concurrency helps to limit the impact on your fleet by allowing you to specify that only a certain number of instances can process an association at one time. You can specify either an absolute number of instances, for example 20, or a percentage of the target set of instances, for example 10%.
+      - Error Thresholds
+        - An error threshold specifies how many association executions can fail before Systems Manager sends a command to each instance configured with that association. The command stops the association from running until the next scheduled execution
+      - The concurrency and error threshold features are collectively called rate controls
+- Patch Manager
+  - automates the process of patching managed instances with both security related and other types of updates
+  - use Patch Manager to apply patches for both operating systems and applications.
+- Distributor
+  - Distributor lets you package your own software—or find AWS-provided agent software packages, such as AmazonCloudWatchAgent—to install on AWS Systems Manager managed instances.
+  - Distributor publishes resources, such as software packages, to AWS Systems Manager managed instances.
+  - Publishing a package advertises specific versions of the package's document—a Systems Manager document that you create when you add the package in Distributor—to managed instances that you identify by managed instance IDs, AWS account IDs, tags, or an AWS Region.
+  - After you create a package in Distributor, which creates an AWS Systems Manager document, you can install the package in one of the following ways.
+    - One time by using AWS Systems Manager Run Command.
+    - On a schedule by using AWS Systems Manager State Manager.
+  - Benefits
+    - One package, many platforms
+    - Control package access across groups of managed instances
+    - Many AWS agent packages included and ready to use
+    - Automate deployment
+
+
+
+
+
+Instances & Nodes
+- AWS Systems Manager provides the following capabilities for managing your Amazon EC2 instances, your on-premises servers and virtual machines (VMs) in your hybrid environment, and other types of AWS resources (nodes).
+- Configuration Compliance
+  - scan your fleet of managed instances for patch compliance and configuration inconsistencies
+  -
+
+Shared Resources
+- Systems Manager Documents
+  - An AWS Systems Manager document (SSM document) defines the actions that Systems Manager performs on your managed instances
+  - includes more than a dozen pre-configured documents that you can use by specifying parameters at runtime
+  - Types of SSM Documents
+    - Command document :
+      - Run Command uses command documents to run commands.
+      - State Manager uses command documents to apply a configuration
+      - Maintenance Windows uses command documents to apply a configuration based on the specified schedule.
+    - Automation document :
+      - Use automation documents when performing common maintenance and deployment tasks such as creating or updating an Amazon Machine Image (AMI).
+      - State Manager uses automation documents to apply a configuration.
+      -  Maintenance Windows uses automation documents to perform common maintenance and deployment tasks based on the specified schedule.
+    - Package document :
+      - In Distributor, a package is represented by a Systems Manager document. A package document includes attached ZIP archive files that contain software or assets to install on managed instances. Creating a package in Distributor creates the package document.
+    - Session document :
+      - Session Manager uses session documents to determine which type of session to start, such as a port forwarding session, a session to run an interactive command, or a session to create an SSH tunnel.
+    - Policy document :
+      - Systems Manager Inventory uses the AWS-GatherSoftwareInventory policy document with a State Manager association to collect inventory data from managed instances.
+      - When creating your own SSM documents, Automation documents and Run Command documents are the preferred method for enforcing a policy on a managed instance.
+    - Change Calendar document :
+      - Systems Manager Change Calendar uses the ChangeCalendar document type. A Change Calendar document stores a calendar entry and associated events that can allow or prevent Automation actions from changing your environment.

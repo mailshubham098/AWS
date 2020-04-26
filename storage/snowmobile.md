@@ -1,0 +1,12 @@
+#### [AWS Snowmobile](https://aws.amazon.com/snowmobile)
+- An **exabyte-scale** data transfer service used to move extremely large amounts of data to AWS. You can transfer up to 100PB per Snowmobile.
+- Snowmobile will be returned to your designated AWS region where your data will be uploaded into the AWS storage services you have selected, such as S3 or Glacier.
+- You can transfer up to 100PB per Snowmobile, a 45-foot long ruggedized shipping container, pulled by a semi-trailer truck.
+- After your data is loaded, Snowmobile is driven back to AWS where your data is imported into Amazon S3 or Amazon Glacier.
+- Snowmobile uses multiple layers of security to help protect your data including dedicated security personnel:
+  - GPS tracking, alarm monitoring
+  - 24/7 video surveillance
+  - an optional escort security vehicle while in transit
+  - All data is encrypted with 256-bit encryption keys you manage through the AWS Key Management Service and designed for security and full chain-of-custody of your data.
+- Snowmobile pricing is based on the amount of data stored on the truck per month.
+- To migrate large datasets of 10PB or more in a single location, you should use Snowmobile. For datasets less than 10PB or distributed in multiple locations, you should use Snowball. 

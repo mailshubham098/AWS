@@ -1,0 +1,39 @@
+- AWS Global Accelerator is a service that improves the availability and performance of your applications with local or global users. It provides static IP addresses that act as a fixed entry point to your application endpoints in a single or multiple AWS Regions, such as your Application Load Balancers, Network Load Balancers or Amazon EC2 instances.
+- AWS Global Accelerator uses the AWS global network to optimize the path from your users to your applications, improving the performance of your TCP and UDP traffic. AWS Global Accelerator continually monitors the health of your application endpoints and will detect an unhealthy endpoint and redirect traffic to healthy endpoints in less than 1 minute.
+
+
+By using AWS Global Accelerator, you can:
+- Associate the static IP addresses provided by AWS Global Accelerator to regional AWS resources or endpoints, such as Network Load Balancers, Application Load Balancers, EC2 Instances, and Elastic IP addresses. The IP addresses are anycast from AWS edge locations so they provide onboarding to the AWS global network close to your users.
+- Easily move endpoints between Availability Zones or AWS Regions without needing to update your DNS configuration or change client-facing applications.
+- Dial traffic up or down for a specific AWS Region by configuring a traffic dial percentage for your endpoint groups. This is especially useful for testing performance and releasing updates.
+- Control the proportion of traffic directed to each endpoint within an endpoint group by assigning weights across the endpoints.
+
+Steps to set up AWS Global Accelerator for your application:
+- Create an accelerator: When you create your accelerator, AWS Global Accelerator provisions two static IP addresses for it. Then you configure one or more listeners to process inbound connections from end clients to your accelerator, based on the protocol and port that you specify.
+- Configure endpoint groups: You choose one or more regional endpoint groups to associate to your accelerator’s listener by specifying the AWS Regions to which you want to distribute traffic. Your listener routes requests to the registered endpoints in this endpoint group. AWS Global Accelerator monitors the health of endpoints within the group using the health check settings defined for each endpoint. You can configure a traffic dial percentage for each endpoint group, which controls the amount of traffic that an endpoint group accepts. By default, the traffic dial is set to 100% for all regional endpoint groups.
+- Register endpoints for endpoint groups: You register one or more regional resources, such as Application Load Balancers, Network Load Balancers, EC2 Instances, or Elastic IP addresses, in each endpoint group. Then you can set weights to choose how much traffic is routed to each endpoint.
+
+How does AWS Global Accelerator work together with Elastic Load Balancing (ELB)?
+- Both of these services solve the challenge of routing user requests to healthy application endpoints. AWS Global Accelerator relies on ELB to provide the traditional load balancing features such as support for internal and non-AWS endpoints, pre-warming, and Layer 7 routing. However, while ELB provides load balancing within one Region, AWS Global Accelerator provides traffic management across multiple Regions.
+- A regional ELB load balancer is an ideal target for AWS Global Accelerator. By using a regional ELB load balancer, you can precisely distribute incoming application traffic across backends, such as Amazon EC2 instances or Amazon ECS tasks, within an AWS Region. AWS Global Accelerator complements ELB by extending these capabilities beyond a single AWS Region, allowing you to provision a global interface for your applications in any number of Regions. If you have workloads that cater to a global client base, we recommend that you use AWS Global Accelerator. If you have workloads hosted in a single AWS Region and used by clients in and around the same Region, you can use an Application Load Balancer or Network Load Balancer to manage your resources.
+
+How is AWS Global Accelerator different from Amazon CloudFront?
+- AWS Global Accelerator and Amazon CloudFront are separate services that use the AWS global network and its edge locations around the world. CloudFront improves performance for both cacheable content (such as images and videos) and dynamic content (such as API acceleration and dynamic site delivery). Global Accelerator improves performance for a wide range of applications over TCP or UDP by proxying packets at the edge to applications running in one or more AWS Regions. Global Accelerator is a good fit for non-HTTP use cases, such as gaming (UDP), IoT (MQTT), or Voice over IP, as well as for HTTP use cases that specifically require static IP addresses or deterministic, fast regional failover. Both services integrate with AWS Shield for DDoS protection.
+
+Can I use AWS Global Accelerator for my on-premises services?
+- You can’t directly configure on-premises resources as endpoints for your static IP addresses, but you can configure a Network Load Balancer (NLB) in each AWS Region to address your on-premises endpoints. Then you can register the NLBs as endpoints in your AWS Global Accelerator configuration.
+
+How is AWS Global Accelerator different from a DNS-based traffic management solution?
+- First, some client devices and internet resolvers cache DNS answers for long periods of time. So when you make a configuration update, or there’s an application failure or change in your routing preference, you don’t know how long it will take before all of your users receive updated IP addresses. With AWS Global Accelerator, you don’t have to rely on the IP address caching settings of client devices. Change propagation takes a matter of seconds, which reduces your application downtime. Second, with Global Accelerator, you get static IP addresses that provide a fixed entry point to your applications. This lets you easily move your endpoints between Availability Zones or between AWS Regions, without having to update the DNS configuration or client-facing applications.
+
+Benefits
+- Instant regional failover
+- High availability
+- No variability around clients that cache IP addresses
+  - Some client devices and internet resolvers cache DNS answers for long periods of time. So when you make a configuration update, or there’s an application failure or change in your routing preference, you don’t know how long it will take before all of your users receive updated IP addresses. With AWS Global Accelerator, you don’t have to rely on the IP address caching settings of client devices. Change propagation takes a matter of seconds, which reduces your application downtime.
+- Improved performance
+- Easy manageability
+- Fine-grained control
+
+I operate only in a single AWS Region. Can I get any benefit from AWS Global Accelerator?
+- Yes. While you might not want to use the intelligent traffic routing capabilities of AWS Global Accelerator, there are a number of advantages to using static IP addresses. First, by using these addresses, you increase the Quality of Service (QoS) for your users by onboarding their traffic onto the AWS global network as close to them as possible. Typically, traffic must take multiple hops through the public internet, over potentially congested and non-redundant network paths, to reach your destination AWS Region. With AWS Global Accelerator, you get to leverage the AWS globally redundant network to help improve your application availability and performance. Second, you have the freedom to easily move your application between AWS Regions without changing your public interface. This means that you can plan for the future, knowing that if your needs change, you can easily migrate or add additional AWS Regions without worrying about how your users will connect to your applications.
